@@ -1,0 +1,22 @@
+{
+  "job_id": "job-56fe6671-8e52-4896-8e22-841a7d04ce1b",
+  "result_type": "processing",
+  "data": {
+    "success": true,
+    "output_rows": 20,
+    "input_rows": 20,
+    "rows_removed": 0,
+    "elapsed_seconds": 0.0,
+    "rows_per_second": 350987.78,
+    "metadata": {
+      "job_id": "job-56fe6671-8e52-4896-8e22-841a7d04ce1b",
+      "total_rows": 20,
+      "chunk_size": 10000,
+      "chunks_processed": 0,
+      "started_at": "2026-03-19T07:23:52.962532Z",
+      "processing_steps": []
+    }
+  },
+  "saved_at": "2026-03-19T07:23:52.970387Z",
+  "version": "1.0"
+}

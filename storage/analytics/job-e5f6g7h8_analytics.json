@@ -1,0 +1,203 @@
+{
+  "job_id": "job-e5f6g7h8",
+  "analytics": {
+    "analytics_id": "analytics-abc123",
+    "job_id": "job-e5f6g7h8",
+    "dataset_id": "dataset-def456",
+    "statistical_analysis": {
+      "row_count": 10000,
+      "column_count": 8,
+      "memory_usage_bytes": 524288,
+      "numeric_columns": {
+        "salary": {
+          "dtype": "int64",
+          "count": 10000,
+          "null_count": 0,
+          "min": 25000.0,
+          "max": 250000.0,
+          "mean": 87500.50,
+          "median": 82000.0,
+          "std": 35600.25,
+          "variance": 1267377506.25,
+          "quartile_25": 62500.0,
+          "quartile_75": 112500.0,
+          "iqr": 50000.0,
+          "skewness": 0.35,
+          "kurtosis": -0.45
+        },
+        "age": {
+          "dtype": "int64",
+          "count": 10000,
+          "null_count": 15,
+          "min": 18.0,
+          "max": 75.0,
+          "mean": 41.25,
+          "median": 40.0,
+          "std": 14.75,
+          "variance": 217.5625,
+          "quartile_25": 30.0,
+          "quartile_75": 52.0,
+          "iqr": 22.0,
+          "skewness": 0.15,
+          "kurtosis": -0.30
+        },
+        "years_experience": {
+          "dtype": "float64",
+          "count": 10000,
+          "null_count": 0,
+          "min": 0.0,
+          "max": 45.0,
+          "mean": 12.75,
+          "median": 11.0,
+          "std": 10.25,
+          "variance": 105.0625,
+          "quartile_25": 4.0,
+          "quartile_75": 21.0,
+          "iqr": 17.0,
+          "skewness": 0.55,
+          "kurtosis": -0.20
+        }
+      },
+      "categorical_columns": {
+        "department": {
+          "dtype": "object",
+          "unique_count": 5,
+          "null_count": 0,
+          "top_values": {
+            "Engineering": 3500,
+            "Sales": 2500,
+            "Management": 2000,
+            "HR": 1200,
+            "Finance": 800
+          }
+        },
+        "status": {
+          "dtype": "object",
+          "unique_count": 3,
+          "null_count": 0,
+          "top_values": {
+            "active": 8500,
+            "inactive": 1200,
+            "pending": 300
+          }
+        }
+      }
+    },
+    "anomaly_detection": {
+      "missing_values": {
+        "age": {
+          "count": 15,
+          "percentage": 0.15,
+          "indices": [
+            45,
+            127,
+            289,
+            512,
+            673
+          ]
+        }
+      },
+      "outliers": {
+        "salary": {
+          "count": 125,
+          "percentage": 1.25,
+          "bounds": {
+            "lower": -12500.0,
+            "upper": 187500.0
+          },
+          "indices": [
+            102,
+            445,
+            678,
+            890,
+            1234
+          ]
+        },
+        "age": {
+          "count": 45,
+          "percentage": 0.45,
+          "bounds": {
+            "lower": 4.0,
+            "upper": 78.0
+          },
+          "indices": [
+            250,
+            567,
+            789,
+            1045,
+            1267
+          ]
+        }
+      },
+      "duplicates": {
+        "total_duplicates": 8,
+        "duplicate_indices": [
+          234,
+          235,
+          567,
+          568,
+          890,
+          891,
+          1234,
+          1235
+        ]
+      }
+    },
+    "trend_analysis": {
+      "numeric_trends": {
+        "salary": {
+          "direction": "increasing",
+          "slope": 125.50,
+          "intercept": 75000.0,
+          "first_value": 75125.50,
+          "last_value": 87500.0,
+          "change_percentage": 16.50,
+          "correlation": 0.85
+        },
+        "age": {
+          "direction": "stable",
+          "slope": 0.015,
+          "intercept": 41.0,
+          "first_value": 41.015,
+          "last_value": 41.15,
+          "change_percentage": 0.034,
+          "correlation": 0.12
+        }
+      }
+    },
+    "insights": [
+      {
+        "type": "info",
+        "severity": "low",
+        "message": "Dataset contains 10000 rows - sufficient for analysis"
+      },
+      {
+        "type": "warning",
+        "severity": "low",
+        "message": "Found 15 missing values in 'age' column (0.15% of data)"
+      },
+      {
+        "type": "info",
+        "severity": "low",
+        "message": "Detected 125 outliers in 'salary' column (1.25% of dataset)"
+      },
+      {
+        "type": "warning",
+        "severity": "medium",
+        "message": "Found 8 duplicate rows (0.08% of dataset)"
+      },
+      {
+        "type": "info",
+        "severity": "low",
+        "message": "Salary shows positive trend with correlation 0.85"
+      },
+      {
+        "type": "success",
+        "severity": "low",
+        "message": "Department distribution is well-balanced across 5 categories"
+      }
+    ]
+  },
+  "saved_at": "2026-03-18T11:00:15.678901",
+  "version": "1.0"
+}

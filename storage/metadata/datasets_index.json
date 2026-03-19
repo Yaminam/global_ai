@@ -1,0 +1,49 @@
+{
+  "index_name": "datasets",
+  "entries": [
+    {
+      "dataset_id": "dataset-sales-2026",
+      "filename": "sales_data_q1_2026.csv",
+      "file_size_mb": 2.0,
+      "row_count": 25000,
+      "column_count": 12,
+      "status": "uploaded",
+      "category": "sales",
+      "uploaded_at": "2026-03-18T09:15:30.123456",
+      "last_processed": "2026-03-18T09:45:00.345678",
+      "description": "Q1 2026 sales transactions"
+    },
+    {
+      "dataset_id": "dataset-customer-2026",
+      "filename": "customer_data_march2026.json",
+      "file_size_mb": 1.5,
+      "row_count": 15000,
+      "column_count": 8,
+      "status": "validated",
+      "category": "customers",
+      "uploaded_at": "2026-03-17T14:20:15.234567",
+      "last_processed": "2026-03-18T08:30:00.456789",
+      "description": "Customer master data",
+      "data_quality": {
+        "completeness": 99.5,
+        "validity": 99.8,
+        "consistency": 99.2
+      }
+    },
+    {
+      "dataset_id": "dataset-inventory-2026",
+      "filename": "inventory_snapshot.xlsx",
+      "file_size_mb": 3.2,
+      "row_count": 8500,
+      "column_count": 15,
+      "status": "uploaded",
+      "category": "inventory",
+      "uploaded_at": "2026-03-18T12:00:00.567890",
+      "last_processed": null,
+      "description": "Current inventory levels"
+    }
+  ],
+  "created_at": "2026-03-18T12:15:30.678901",
+  "count": 3,
+  "version": "1.0"
+}

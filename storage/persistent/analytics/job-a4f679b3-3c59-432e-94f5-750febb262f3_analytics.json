@@ -1,0 +1,47 @@
+{
+  "job_id": "job-a4f679b3-3c59-432e-94f5-750febb262f3",
+  "analytics": {
+    "job_id": "job-a4f679b3-3c59-432e-94f5-750febb262f3",
+    "source_file_path": "./storage\\datasets\\file-0147c1d8-dc1a-4b13-8f44-e3661145da4d.csv",
+    "statistics": {
+      "total_records": 20,
+      "total_columns": 12,
+      "missing_values": 0,
+      "duplicate_rows": 0
+    },
+    "distribution": {
+      "units": 8.45,
+      "unit_price": 634.345,
+      "discount_pct": 0.0675,
+      "revenue": 985.677,
+      "cost": 693.25,
+      "customer_age": 38.3,
+      "satisfaction": 4.37
+    },
+    "correlations": {
+      "units": 0.7009903464783079,
+      "unit_price": 0.6870706289556714,
+      "discount_pct": 0.5681559466583525,
+      "revenue": 0.6477006291150106,
+      "cost": 0.6981310395947499,
+      "customer_age": 0.4565444075813961,
+      "satisfaction": 0.48878863898688335
+    },
+    "missing_analysis": {
+      "order_id": 0,
+      "order_date": 0,
+      "region": 0,
+      "category": 0,
+      "channel": 0,
+      "units": 0,
+      "unit_price": 0,
+      "discount_pct": 0,
+      "revenue": 0,
+      "cost": 0
+    },
+    "quality_score": 100.0,
+    "generated_at": "2026-03-19T07:08:14.967917"
+  },
+  "saved_at": "2026-03-19T07:08:14.967964Z",
+  "version": "1.0"
+}

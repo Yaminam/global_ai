@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data Processing & Analytics Platform</title>
+    <link rel="stylesheet" href="css/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js"></script>
+</head>
+<body>
+    <!-- Navigation Header -->
+    <header class="navbar">
+        <div class="container navbar-container">
+            <div class="logo">
+                <h1>Advanced Analytics Platform</h1>
+            </div>
+            <nav class="nav-menu">
+                <a href="#upload" class="nav-link">Upload</a>
+                <a href="#preview" class="nav-link">Preview</a>
+                <a href="#dashboard" class="nav-link">Dashboard</a>
+                <button id="healthBtn" class="nav-link btn-link">System Status</button>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container">
+        <!-- Upload Section -->
+        <section id="upload" class="section upload-section">
+            <div class="section-header">
+                <h2>Upload Data</h2>
+                <p>Upload CSV, JSON, or Excel files for processing and analysis</p>
+            </div>
+
+            <div class="upload-container">
+                <!-- Drag & Drop Area -->
+                <div id="dropZone" class="drop-zone">
+                    <div class="drop-zone-content">
+                        <svg class="upload-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                            <polyline points="17 8 12 3 7 8"></polyline>
+                            <line x1="12" y1="3" x2="12" y2="15"></line>
+                        </svg>
+                        <h3>Drag files here or click to browse</h3>
+                        <p>Supported formats: CSV, JSON, XLSX</p>
+                    </div>
+                    <input type="file" id="fileInput" class="file-input" accept=".csv,.json,.xlsx,.xls" />
+                </div>
+
+                <!-- File Info -->
+                <div id="fileInfo" class="file-info hidden">
+                    <div class="file-details">
+                        <span id="fileName" class="file-name">No file selected</span>
+                        <span id="fileSize" class="file-size"></span>
+                    </div>
+                    <button id="clearFileBtn" class="btn btn-secondary">Clear</button>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="action-buttons">
+                    <button id="validateBtn" class="btn btn-primary" disabled>
+                        <span class="btn-text">Validate Data</span>
+                        <span id="validateSpinner" class="spinner hidden"></span>
+                    </button>
+                    <button id="processBtn" class="btn btn-success" disabled>
+                        <span class="btn-text">Process & Analyze</span>
+                        <span id="processSpinner" class="spinner hidden"></span>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Status Messages -->
+        <div id="statusMessage" class="status-message hidden"></div>
+        <div id="errorMessage" class="error-message hidden"></div>
+
+        <!-- Preview Section -->
+        <section id="preview" class="section preview-section hidden">
+            <div class="section-header">
+                <h2>Data Preview</h2>
+                <p>View and validate your uploaded data</p>
+            </div>
+
+            <div class="preview-container">
+                <!-- Validation Results -->
+                <div id="validationResults" class="validation-results hidden">
+                    <div class="validation-header">
+                        <h3>Validation Report</h3>
+                        <span id="validationStatus" class="status-badge"></span>
+                    </div>
+                    <div id="validationContent" class="validation-content"></div>
+                </div>
+
+                <!-- Data Table -->
+                <div class="table-wrapper">
+                    <table id="dataTable" class="data-table">
+                        <thead>
+                            <tr id="tableHeader"></tr>
+                        </thead>
+                        <tbody id="tableBody"></tbody>
+                    </table>
+                    <div id="noDataMessage" class="no-data-message">
+                        No data to preview. Upload and validate a file first.
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Dashboard Section -->
+        <section id="dashboard" class="section dashboard-section hidden">
+            <div class="section-header">
+                <h2>Analytics Dashboard</h2>
+                <p>View processing results and analytics</p>
+            </div>
+
+            <div class="dashboard-container">
+                <!-- Processing Status -->
+                <div id="processingStatus" class="processing-status hidden">
+                    <div class="status-card">
+                        <h3>Processing Status</h3>
+                        <div class="progress-bar">
+                            <div id="progressFill" class="progress-fill"></div>
+                        </div>
+                        <p id="statusText" class="status-text">Processing...</p>
+                        <div class="job-details">
+                            <div>Job ID: <span id="jobId" class="mono">-</span></div>
+                            <div>Status: <span id="jobStatus" class="status-badge">Queued</span></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Statistics Cards -->
+                <div id="statsCards" class="stats-grid hidden">
+                    <div class="stat-card">
+                        <h4>Total Records</h4>
+                        <p id="statRecords" class="stat-value">0</p>
+                    </div>
+                    <div class="stat-card">
+                        <h4>Columns</h4>
+                        <p id="statColumns" class="stat-value">0</p>
+                    </div>
+                    <div class="stat-card">
+                        <h4>Missing Values</h4>
+                        <p id="statMissing" class="stat-value">0</p>
+                    </div>
+                    <div class="stat-card">
+                        <h4>Duplicates</h4>
+                        <p id="statDuplicates" class="stat-value">0</p>
+                    </div>
+                </div>
+
+                <!-- Charts Section -->
+                <div id="chartsSection" class="charts-section hidden">
+                    <!-- Distribution Chart -->
+                    <div class="chart-container">
+                        <h3>Data Distribution</h3>
+                        <canvas id="distributionChart"></canvas>
+                    </div>
+
+                    <!-- Correlation Heatmap -->
+                    <div class="chart-container">
+                        <h3>Correlation Matrix</h3>
+                        <canvas id="correlationChart"></canvas>
+                    </div>
+
+                    <!-- Missing Values Chart -->
+                    <div class="chart-container">
+                        <h3>Missing Values Analysis</h3>
+                        <canvas id="missingChart"></canvas>
+                    </div>
+
+                    <!-- Data Quality Chart -->
+                    <div class="chart-container">
+                        <h3>Data Quality Score</h3>
+                        <canvas id="qualityChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Results Section -->
+                <div id="resultsSection" class="results-section hidden">
+                    <h3>Processing Results</h3>
+                    <div class="results-grid">
+                        <div id="resultsContent" class="results-content"></div>
+                    </div>
+                    <div class="action-buttons">
+                        <button id="downloadBtn" class="btn btn-primary">
+                            Download Results
+                        </button>
+                        <button id="downloadDashboardBtn" class="btn btn-accent">
+                            Download Dashboard PDF
+                        </button>
+                        <button id="newAnalysisBtn" class="btn btn-secondary">
+                            New Analysis
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- API Status -->
+        <section class="section api-status-section">
+            <h3>System Status</h3>
+            <div id="apiStatus" class="api-status">
+                <div class="status-item">
+                    <span>Backend API</span>
+                    <span id="apiStatusBadge" class="status-badge disconnected">Checking...</span>
+                </div>
+                <div class="status-item">
+                    <span>Queue Workers</span>
+                    <span id="workersBadge" class="status-badge">-</span>
+                </div>
+                <div class="status-item">
+                    <span>Storage</span>
+                    <span id="storageBadge" class="status-badge">-</span>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2026 Advanced Data Processing & Analytics Platform</p>
+            <p class="footer-links">
+                <a href="#api">System Status</a> | 
+                <a href="#" id="refreshStatusBtn">Refresh Status</a>
+            </p>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="js/api.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
