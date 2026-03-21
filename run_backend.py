@@ -28,29 +28,45 @@ def upload_file():
     if file.filename == '':
         return jsonify({'error': 'No file selected'}), 400
     
-    # Simple file handling
-    import uuid
-    import os
-    job_id = str(uuid.uuid4())
-    
-    # Create upload directory if needed
-    upload_dir = './storage/uploads'
-    os.makedirs(upload_dir, exist_ok=True)
-    
-    # Save file
-    filename = file.filename or 'uploaded_file'
-    file_path = os.path.join(upload_dir, filename).replace('\\', '/')
-    file.save(file_path)
-    
-    return jsonify({
-        'success': True,
-        'data': {
-            'job_id': job_id,
-            'filename': filename,
-            'file_path': file_path,
-            'message': 'File uploaded successfully'
-        }
-    }), 200
+    try:
+        # Simple file handling
+        import uuid
+        import os
+        job_id = str(uuid.uuid4())
+        
+        # Create upload directory if needed
+        upload_dir = './storage/uploads'
+        os.makedirs(upload_dir, exist_ok=True)
+        
+        # Save file with unique name
+        filename = f"{job_id}_{file.filename}"
+        file_path = os.path.join(upload_dir, filename)
+        file.save(file_path)
+        
+        # Verify file was saved
+        if not os.path.exists(file_path):
+            return jsonify({
+                'success': False,
+                'error': f'File could not be saved to {file_path}'
+            }), 500
+        
+        print(f"DEBUG: File uploaded successfully to {file_path}")
+        
+        return jsonify({
+            'success': True,
+            'data': {
+                'job_id': job_id,
+                'filename': filename,
+                'file_path': os.path.abspath(file_path),
+                'message': 'File uploaded successfully'
+            }
+        }), 200
+    except Exception as e:
+        print(f"ERROR in upload_file: {str(e)}")
+        return jsonify({
+            'success': False,
+            'error': f'Upload failed: {str(e)}'
+        }), 500
 
 @app.route('/api/validate', methods=['POST'])
 def validate_file():
@@ -158,63 +174,71 @@ def process_file():
         missing_values = 0
         duplicate_rows = 0
         
-        if file_path and os.path.exists(file_path):
-            with open(file_path, 'r', encoding='utf-8') as f:
-                reader = csv.DictReader(f)
-                columns = reader.fieldnames or []
-                
-                for row in reader:
-                    records.append(row)
-                    # Count missing values
-                    for col in columns:
-                        cell_value = row.get(col) or ''
-                        if not cell_value or cell_value.strip() == '':
-                            missing_values += 1
+        if not file_path:
+            return jsonify({
+                'success': False,
+                'error': 'No file path provided'
+            }), 400
+        
+        if not os.path.exists(file_path):
+            print(f"DEBUG: File not found at {file_path}")
+            return jsonify({
+                'success': False,
+                'error': f'File not found: {file_path}'
+            }), 404
+        
+        with open(file_path, 'r', encoding='utf-8') as f:
+            reader = csv.DictReader(f)
+            columns = reader.fieldnames or []
             
-            # Check duplicates
-            unique_rows = set()
-            for row in records:
-                row_tuple = tuple(row.values())
-                if row_tuple not in unique_rows:
-                    unique_rows.add(row_tuple)
-                else:
-                    duplicate_rows += 1
-            
-            total_records = len(records)
-            total_columns = len(columns)
-            
-            # Store statistics for this job (including file_path and columns)
-            job_statistics[job_id] = {
-                'file_path': file_path,
-                'columns': list(columns),
-                'records': records,
-                'total_records': total_records,
-                'total_columns': total_columns,
-                'missing_values': missing_values,
-                'duplicate_rows': duplicate_rows,
-                'quality_score': max(50, 100 - (duplicate_rows * 2) - (missing_values // (total_columns or 1)))
-            }
-    except:
+            for row in reader:
+                records.append(row)
+                # Count missing values
+                for col in columns:
+                    cell_value = row.get(col) or ''
+                    if not cell_value or cell_value.strip() == '':
+                        missing_values += 1
+        
+        # Check duplicates
+        unique_rows = set()
+        for row in records:
+            row_tuple = tuple(row.values())
+            if row_tuple not in unique_rows:
+                unique_rows.add(row_tuple)
+            else:
+                duplicate_rows += 1
+        
+        total_records = len(records)
+        total_columns = len(columns)
+        
+        # Store statistics for this job (including file_path and columns)
         job_statistics[job_id] = {
             'file_path': file_path,
-            'columns': [],
-            'records': [],
-            'total_records': 0,
-            'total_columns': 0,
-            'missing_values': 0,
-            'duplicate_rows': 0,
-            'quality_score': 50
+            'columns': list(columns),
+            'records': records,
+            'total_records': total_records,
+            'total_columns': total_columns,
+            'missing_values': missing_values,
+            'duplicate_rows': duplicate_rows,
+            'quality_score': max(50, 100 - (duplicate_rows * 2) - (missing_values // (total_columns or 1)))
         }
-    
-    return jsonify({
-        'success': True,
-        'data': {
-            'job_id': job_id,
-            'file_path': file_path,
-            'status': 'processing',
-            'message': 'File processing started'
-        }
-    }), 200
+        
+        return jsonify({
+            'success': True,
+            'data': {
+                'job_id': job_id,
+                'file_path': file_path,
+                'status': 'processing',
+                'message': 'File processing started'
+            }
+        }), 200
+        
+    except Exception as e:
+        print(f"ERROR in process_file: {str(e)}")
+        return jsonify({
+            'success': False,
+            'error': f'Processing failed: {str(e)}'
+        }), 500
 
 @app.route('/api/results/<job_id>', methods=['GET'])
 def get_results(job_id):
