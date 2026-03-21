@@ -4,9 +4,11 @@ services:
     runtime: python
     plan: free
     buildCommand: pip install -r requirements.txt
-    startCommand: gunicorn run_backend:app --bind 0.0.0.0:$PORT
+    startCommand: gunicorn run_backend:app --bind 0.0.0.0:5000 --workers 2 --timeout 120 --log-level info
     envVars:
       - key: FLASK_ENV
         value: production
       - key: PYTHONUNBUFFERED
-        value: true
+        value: "1"
+      - key: PORT
+        value: "5000"
