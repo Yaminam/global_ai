@@ -1,393 +1,265 @@
-# DataFlow - Analytics Platform
+🚀 Advanced Smart Data Processing & Analytics Platform
+⚡ Run This Project on Another System (Quick Setup)
 
-A web-based analytics platform for uploading, validating, processing, and visualizing CSV/JSON/Excel data with interactive dashboards and PDF report generation.
+Follow these steps to run the project on any new machine:
 
-![Python](https://img.shields.io/badge/python-3.8+-blue)
-![Flask](https://img.shields.io/badge/flask-2.3+-orange)
-![License](https://img.shields.io/badge/license-MIT-blue)
+# 1. Clone the repository
+git clone <repository-url>
+cd sadul_globalai
 
-🔗 **GitHub Repository**: [https://github.com/Yaminam/global_ai.git](https://github.com/Yaminam/global_ai.git)
+# 2. Setup Backend
+cd backend
+python -m venv venv
 
----
+# Activate virtual environment
+# Windows:
+venv\Scripts\activate
+# Mac/Linux:
+source venv/bin/activate
 
-## Table of Contents
-
-- [Overview](#overview)
-- [Tech Stack](#tech-stack)
-- [Project Structure](#project-structure)
-- [Windows Setup Guide](#windows-setup-guide)
-- [How to Use](#how-to-use)
-- [API Endpoints](#api-endpoints)
-- [Deployment](#deployment)
-- [Troubleshooting](#troubleshooting)
-
----
-
-## Overview
-
-DataFlow lets you:
-
-- Upload CSV, JSON, and Excel files (drag & drop or click)
-- Validate data with automated quality checks
-- Process data and compute statistics
-- View interactive charts and KPI dashboards
-- Download results as CSV or PDF reports
-- Monitor system health in real time
-
----
-
-## Tech Stack
-
-### Backend
-
-| Package | Version | Purpose |
-|---------|---------|---------|
-| Flask | >= 2.3.0 | Web framework |
-| Flask-CORS | >= 4.0.0 | Cross-origin request support |
-| Werkzeug | >= 2.3.0 | WSGI utilities |
-| Gunicorn | >= 21.2.0 | Production WSGI server |
-| Pandas | >= 2.0.0 | Data processing and analysis |
-| NumPy | >= 1.24.0 | Numerical computing |
-| scikit-learn | >= 1.2.0 | Machine learning utilities |
-| openpyxl | >= 3.1.0 | Excel (.xlsx) file support |
-| ReportLab | >= 4.0.0 | PDF report generation |
-| Matplotlib | >= 3.7.0 | Chart/plot generation |
-| Pillow | >= 10.0.0 | Image processing |
-| python-dotenv | >= 1.0.0 | Environment variable loading |
-| requests | >= 2.31.0 | HTTP client |
-| python-dateutil | >= 2.8.2 | Date parsing |
-
-### Frontend
-
-| Technology | Purpose |
-|-----------|---------|
-| HTML5 / CSS3 | Semantic markup and styling |
-| JavaScript (ES6+) | Application logic (no framework) |
-| Chart.js 4.4.0 | Interactive charts |
-| Google Fonts (Inter) | Typography |
-| Fetch API | AJAX calls to backend |
-
-### Storage
-
-- File-based (no database required)
-- Uploaded files saved to `./storage/uploads/`
-- Results stored as JSON in memory per session
-
----
-
-## Project Structure
-
-```
-global_ai/
-│
-├── frontend/                   # Frontend application
-│   ├── index.html              # Main HTML page
-│   ├── css/
-│   │   └── style.css           # All styles
-│   └── js/
-│       ├── app.js              # Application logic
-│       └── api.js              # API client module
-│
-├── storage/
-│   └── uploads/                # Uploaded files saved here
-│
-├── run_backend.py              # Flask server (all API endpoints)
-├── sample_data.csv             # Sample CSV for testing
-├── requirements.txt            # Python dependencies
-├── render.yaml                 # Render deployment config
-├── QUICKSTART.md               # Quick start guide
-└── README.md                   # This file
-```
-
-**Architecture:**
-
-```
-Browser (http://localhost:5000)
-        |
-        | HTTP / JSON
-        v
-Flask Server  —  run_backend.py  (Port 5000)
-  |
-  |-- Static files served from  frontend/
-  |-- /api/upload
-  |-- /api/validate
-  |-- /api/process
-  |-- /api/analytics/<job_id>
-  |-- /api/results/<job_id>
-  |-- /api/health
-        |
-        v
-./storage/uploads/   (saved files)
-```
-
----
-
-## Windows Setup Guide
-
-### Prerequisites
-
-- Windows 10 or 11
-- Python 3.8 or higher — [Download Python](https://www.python.org/downloads/)
-- Git (optional) — [Download Git](https://git-scm.com/downloads)
-- A web browser (Chrome, Edge, or Firefox)
-- ~500 MB free disk space
-
----
-
-### Step 1 — Install Python
-
-1. Download from [python.org](https://www.python.org/downloads/)
-2. Run the installer
-3. **Check "Add Python to PATH"** before clicking Install Now
-4. Verify in Command Prompt:
-
-```cmd
-python --version
-```
-
-Expected output: `Python 3.x.x`
-
----
-
-### Step 2 — Clone the Repository
-
-**Using Git (recommended):**
-
-```cmd
-git clone https://github.com/Yaminam/global_ai.git
-cd global_ai
-```
-
-**Without Git (ZIP download):**
-
-1. Download and extract the ZIP file from [GitHub](https://github.com/Yaminam/global_ai)
-2. Open Command Prompt (`Win + R` → type `cmd` → Enter)
-3. Navigate to the extracted folder:
-
-```cmd
-cd C:\Users\<YourName>\Desktop\global_ai
-```
-
----
-
-### Step 3 — Create a Virtual Environment (Recommended)
-
-```cmd
-python -m venv .venv
-.venv\Scripts\activate
-```
-
-Your prompt will change to `(.venv) ...` confirming activation.
-This keeps project dependencies isolated from your system Python.
-
-To deactivate later: `deactivate`
-
----
-
-### Step 4 — Install Dependencies
-
-```cmd
+# Install dependencies
 pip install -r requirements.txt
-```
 
-This installs all required packages including Flask, Pandas, ReportLab, scikit-learn, and more.
+# 3. Run Backend
+python app.py
+# 4. Run Frontend (new terminal)
+cd frontend
+python -m http.server 8000
+🌐 Access
 
-**Verify installation:**
+Frontend → http://localhost:8000
 
-```cmd
-pip list
-```
+Backend API → http://localhost:5000/api
 
----
+📌 Project Overview
 
-### Step 5 — Run the Application
+A production-ready full-stack data processing platform built using:
 
-```cmd
-python run_backend.py
-```
+Frontend: HTML5, CSS3, Vanilla JavaScript
 
-**Expected output:**
+Backend: Python Flask
 
-```
- * Running on http://127.0.0.1:5000
- * Running on http://0.0.0.0:5000
-```
+Analytics: NumPy, Pandas, Scikit-learn
 
-Keep this terminal open while using the app.
+Storage: JSON-based system
 
----
+📁 Project Structure
+sadul_globalai/
+├── frontend/        # UI (Vanilla JS)
+├── backend/         # Flask API
+├── analytics/       # Data processing logic
+├── utils/           # Helper modules
+├── storage/         # Data storage
+├── docs/            # Documentation
+└── tests/           # Test cases
+🚀 Features
+🔹 Core Features
 
-### Step 6 — Open in Browser
+File Upload (CSV, JSON, XLSX)
 
-Go to: **http://localhost:5000**
+Data Validation (rules + quality checks)
 
-You should see the DataFlow Analytics Platform dashboard.
+Data Processing (transformations & aggregations)
 
----
+Analytics Dashboard
 
-### Step 7 — Test with Sample Data
+Export (JSON, CSV, Excel, PDF)
 
-1. Drag `sample_data.csv` onto the upload zone (or click to browse)
-2. Click **Validate Data**
-3. Click **Process & Analyze**
-4. Explore the charts and download the PDF report
+📊 Analytics
 
----
+Statistical Analysis
 
-## How to Use
+Correlation & Distribution
 
-### 1. Upload a File
+Anomaly Detection (Isolation Forest)
 
-- Supported formats: `.csv`, `.json`, `.xlsx`, `.xls`
-- Drag and drop onto the upload zone, or click to browse
-- Max file size: 100 MB
+Trend Analysis & Forecasting
 
-### 2. Validate
+Custom Reports
 
-Click **Validate Data** to:
+⚡ Performance
 
-- Preview the first 10 rows
-- Count total records and columns
-- Detect missing values and duplicate rows
-- Calculate a data quality score (0–100%)
+Async Processing
 
-### 3. Process & Analyze
+Worker Pools
 
-Click **Process & Analyze** to:
+Streaming for large files
 
-- Compute statistics (mean, median, etc.)
-- Calculate correlations between numeric columns
-- Generate chart-ready data for the dashboard
+Background Jobs
 
-### 4. View the Dashboard
+Caching support
 
-After processing you will see:
+🔒 Security
 
-- **KPI cards** — total records, columns, missing values, duplicates
-- **Column Mean Values** — bar chart
-- **Correlation Strength** — correlation analysis chart
-- **Missing Values per Column** — column-level missing data
-- **Data Quality Score** — doughnut gauge (0–100%)
+Input Validation
 
-### 5. Download Results
+Rate Limiting
 
-- **CSV** — download the processed data
-- **PDF** — professional report with statistics, tables, and quality metrics
+File Type Restrictions
 
-### 6. System Status
+Checksum Verification
 
-The bottom panel shows live status of the backend API, workers, and storage.
-Click **Refresh** to update.
+🔌 API Endpoints
+Method	Endpoint	Description
+POST	/api/upload	Upload dataset
+POST	/api/validate	Validate data
+POST	/api/process	Process dataset
+GET	/api/status/<job_id>	Check job status
+GET	/api/results/<job_id>	Fetch results
+GET	/api/analytics/<job_id>	Get analytics
+DELETE	/api/jobs/<job_id>	Cancel job
+🔄 Data Flow
+Upload → Validate → Process → Analyze → Store → Visualize
+⚙️ Configuration
 
----
+Create .env inside backend/:
 
-## API Endpoints
+FLASK_ENV=development
+FLASK_DEBUG=True
+SECRET_KEY=your-secret-key
 
-### Core
+STORAGE_PATH=./storage
+MAX_FILE_SIZE_MB=1024
+
+MAX_WORKERS=4
+JOB_TIMEOUT_MINUTES=60
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| `POST` | `/api/upload` | Upload a file |
-| `POST` | `/api/validate` | Validate uploaded file |
-| `POST` | `/api/process` | Start a processing job |
-| `GET` | `/api/results/<job_id>` | Get job results |
-| `GET` | `/api/analytics/<job_id>` | Get analytics / chart data |
-| `GET` | `/api/results/<job_id>/download?format=csv` | Download CSV |
-| `GET` | `/api/results/<job_id>/dashboard-pdf` | Download PDF report |
+ENABLE_ANOMALY_DETECTION=True
+ENABLE_TREND_ANALYSIS=True
 
-### System
+ENABLE_CORS=True
+RATE_LIMIT_ENABLED=True
+🧪 Development
+Run Tests
+pytest tests/
+pytest --cov=backend tests/
+Code Quality
+flake8 backend/
+mypy backend/
+black backend/
+🚀 Deployment
+Production Server
+gunicorn -w 4 -b 0.0.0.0:5000 backend.app:app
+Alternative
+waitress-serve --port=5000 backend.app:app
+Nginx Example
+server {
+    listen 80;
+    server_name yourdomain.com;
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| `GET` | `/api/health` | Health check |
-| `GET` | `/api/async/job/<job_id>` | Job status |
-| `GET` | `/api/storage/stats` | Storage statistics |
+    location / {
+        proxy_pass http://localhost:5000;
+        proxy_set_header Host $host;
+    }
+}
+💾 Storage Strategy
+Development
 
----
+JSON files (local storage)
 
-## Deployment
+Optional SQLite
 
-### Local Development
+Production
 
-```cmd
-python run_backend.py
-```
+PostgreSQL
 
-Runs on `http://localhost:5000`.
+Redis (caching)
 
-### Production on Windows (Waitress)
+Cloud Storage (S3 / GCS / Azure)
 
-Waitress is a Windows-compatible production server:
+Elasticsearch (optional)
 
-```cmd
-pip install waitress
-waitress-serve --port=5000 run_backend:app
-```
+📊 Monitoring
+Logs
 
-### Cloud Deployment (Render)
+Stored in /logs
 
-The included `render.yaml` is pre-configured for [Render](https://render.com):
+JSON structured logging
 
-```yaml
-startCommand: gunicorn run_backend:app --bind 0.0.0.0:$PORT
-```
+Metrics
 
-Steps:
-1. Push the repository to GitHub
-2. Create a new Web Service on Render
-3. Connect the GitHub repo — Render auto-detects `render.yaml` and deploys
+Processing time
 
----
+API response time
 
-## Troubleshooting
+Success/failure rates
 
-### Port 5000 already in use
+Health Check
+GET /health
+🛠 Common Workflow
+1. Upload → /api/upload
+2. Validate → /api/validate
+3. Process → /api/process
+4. Track → /api/status/{job_id}
+5. Results → /api/results/{job_id}
+6. Analytics → /api/analytics/{job_id}
+📤 Export Formats
+/api/results/{job_id}?format=json
+/api/results/{job_id}?format=csv
+/api/results/{job_id}?format=xlsx
+⚡ Performance Tips
 
-```cmd
-netstat -ano | findstr :5000
-taskkill /PID <PID> /F
-python run_backend.py
-```
+Use streaming for files >100MB
 
-### `python` is not recognized
+Increase worker count for concurrency
 
-- Reinstall Python and make sure **Add Python to PATH** is checked
-- Or use `py run_backend.py` instead of `python run_backend.py`
-- Restart Command Prompt after installing Python
+Enable caching for repeated queries
 
-### ModuleNotFoundError (e.g. `No module named 'flask'`)
+Batch multiple jobs
 
-Make sure the virtual environment is activated, then reinstall:
+Archive old data
 
-```cmd
-.venv\Scripts\activate
-pip install -r requirements.txt --force-reinstall
-```
+🐛 Troubleshooting
+Issue	Solution
+Upload fails	Check max file size
+Timeout	Increase JOB_TIMEOUT
+Memory error	Enable streaming
+CORS error	Update config
+🤝 Contributing
+git checkout -b feature/your-feature
+git commit -m "Add feature"
+git push origin feature/your-feature
+Guidelines
 
-### Charts not showing
+Follow PEP 8
 
-1. Open browser DevTools (`F12`) → Console tab — look for errors
-2. Wait for processing to reach 100%
-3. Hard-refresh: `Ctrl + Shift + R`
-4. Try Chrome or Edge
+Add type hints
 
-### PDF download fails
+Write tests
 
-```cmd
-pip install reportlab --upgrade
-```
+Document logic
 
-### Blank page or 404 on http://localhost:5000
+🛣 Roadmap
 
-1. Confirm `run_backend.py` is still running in the terminal
-2. Check that the `frontend/` folder and its files exist
-3. Clear browser cache: `Ctrl + Shift + Delete`
+Real-time streaming
 
-### Permission denied writing to storage
+ML model integration
 
-Run Command Prompt as Administrator:
-Right-click `cmd` → **Run as administrator** → then run `python run_backend.py`
+Advanced visualization
 
----
+GraphQL API
 
-**Made for Data Analytics**
+Mobile app
+
+Distributed processing
+
+📦 Version
+v1.0.0
+
+Initial Release
+
+Core pipeline (upload → process → analytics)
+
+REST API
+
+📧 Support
+
+GitHub Issues
+
+Documentation (docs/)
+
+Email: support@example.com
+
+📜 License
+
+MIT License
