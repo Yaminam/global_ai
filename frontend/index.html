@@ -3,233 +3,336 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Data Processing & Analytics Platform</title>
+    <title>DataFlow — Analytics Platform</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/style.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js"></script>
 </head>
 <body>
-    <!-- Navigation Header -->
-    <header class="navbar">
-        <div class="container navbar-container">
-            <div class="logo">
-                <h1>Advanced Analytics Platform</h1>
+
+<!-- ═══════════════════════════════ NAVBAR ═══════════════════════════════ -->
+<header class="navbar">
+    <div class="nav-inner">
+        <div class="brand">
+            <div class="brand-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5">
+                    <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+                </svg>
             </div>
-            <nav class="nav-menu">
-                <a href="#upload" class="nav-link">Upload</a>
-                <a href="#preview" class="nav-link">Preview</a>
-                <a href="#dashboard" class="nav-link">Dashboard</a>
-                <button id="healthBtn" class="nav-link btn-link">System Status</button>
-            </nav>
+            <span class="brand-name">DataFlow</span>
         </div>
-    </header>
+        <nav class="nav-links">
+            <a href="#upload"    class="nav-a">Upload</a>
+            <a href="#preview"   class="nav-a">Preview</a>
+            <a href="#dashboard" class="nav-a">Dashboard</a>
+            <button id="healthBtn" class="nav-status-btn">
+                <span class="dot-live"></span> System Status
+            </button>
+        </nav>
+    </div>
+</header>
 
-    <!-- Main Content -->
-    <main class="container">
-        <!-- Upload Section -->
-        <section id="upload" class="section upload-section">
-            <div class="section-header">
-                <h2>Upload Data</h2>
-                <p>Upload CSV, JSON, or Excel files for processing and analysis</p>
-            </div>
-
-            <div class="upload-container">
-                <!-- Drag & Drop Area -->
-                <div id="dropZone" class="drop-zone">
-                    <div class="drop-zone-content">
-                        <svg class="upload-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                            <polyline points="17 8 12 3 7 8"></polyline>
-                            <line x1="12" y1="3" x2="12" y2="15"></line>
-                        </svg>
-                        <h3>Drag files here or click to browse</h3>
-                        <p>Supported formats: CSV, JSON, XLSX</p>
-                    </div>
-                    <input type="file" id="fileInput" class="file-input" accept=".csv,.json,.xlsx,.xls" />
-                </div>
-
-                <!-- File Info -->
-                <div id="fileInfo" class="file-info hidden">
-                    <div class="file-details">
-                        <span id="fileName" class="file-name">No file selected</span>
-                        <span id="fileSize" class="file-size"></span>
-                    </div>
-                    <button id="clearFileBtn" class="btn btn-secondary">Clear</button>
-                </div>
-
-                <!-- Action Buttons -->
-                <div class="action-buttons">
-                    <button id="validateBtn" class="btn btn-primary" disabled>
-                        <span class="btn-text">Validate Data</span>
-                        <span id="validateSpinner" class="spinner hidden"></span>
-                    </button>
-                    <button id="processBtn" class="btn btn-success" disabled>
-                        <span class="btn-text">Process & Analyze</span>
-                        <span id="processSpinner" class="spinner hidden"></span>
-                    </button>
-                </div>
-            </div>
-        </section>
-
-        <!-- Status Messages -->
-        <div id="statusMessage" class="status-message hidden"></div>
-        <div id="errorMessage" class="error-message hidden"></div>
-
-        <!-- Preview Section -->
-        <section id="preview" class="section preview-section hidden">
-            <div class="section-header">
-                <h2>Data Preview</h2>
-                <p>View and validate your uploaded data</p>
-            </div>
-
-            <div class="preview-container">
-                <!-- Validation Results -->
-                <div id="validationResults" class="validation-results hidden">
-                    <div class="validation-header">
-                        <h3>Validation Report</h3>
-                        <span id="validationStatus" class="status-badge"></span>
-                    </div>
-                    <div id="validationContent" class="validation-content"></div>
-                </div>
-
-                <!-- Data Table -->
-                <div class="table-wrapper">
-                    <table id="dataTable" class="data-table">
-                        <thead>
-                            <tr id="tableHeader"></tr>
-                        </thead>
-                        <tbody id="tableBody"></tbody>
-                    </table>
-                    <div id="noDataMessage" class="no-data-message">
-                        No data to preview. Upload and validate a file first.
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- Dashboard Section -->
-        <section id="dashboard" class="section dashboard-section hidden">
-            <div class="section-header">
-                <h2>Analytics Dashboard</h2>
-                <p>View processing results and analytics</p>
-            </div>
-
-            <div class="dashboard-container">
-                <!-- Processing Status -->
-                <div id="processingStatus" class="processing-status hidden">
-                    <div class="status-card">
-                        <h3>Processing Status</h3>
-                        <div class="progress-bar">
-                            <div id="progressFill" class="progress-fill"></div>
-                        </div>
-                        <p id="statusText" class="status-text">Processing...</p>
-                        <div class="job-details">
-                            <div>Job ID: <span id="jobId" class="mono">-</span></div>
-                            <div>Status: <span id="jobStatus" class="status-badge">Queued</span></div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Statistics Cards -->
-                <div id="statsCards" class="stats-grid hidden">
-                    <div class="stat-card">
-                        <h4>Total Records</h4>
-                        <p id="statRecords" class="stat-value">0</p>
-                    </div>
-                    <div class="stat-card">
-                        <h4>Columns</h4>
-                        <p id="statColumns" class="stat-value">0</p>
-                    </div>
-                    <div class="stat-card">
-                        <h4>Missing Values</h4>
-                        <p id="statMissing" class="stat-value">0</p>
-                    </div>
-                    <div class="stat-card">
-                        <h4>Duplicates</h4>
-                        <p id="statDuplicates" class="stat-value">0</p>
-                    </div>
-                </div>
-
-                <!-- Charts Section -->
-                <div id="chartsSection" class="charts-section hidden">
-                    <!-- Distribution Chart -->
-                    <div class="chart-container">
-                        <h3>Data Distribution</h3>
-                        <canvas id="distributionChart"></canvas>
-                    </div>
-
-                    <!-- Correlation Heatmap -->
-                    <div class="chart-container">
-                        <h3>Correlation Matrix</h3>
-                        <canvas id="correlationChart"></canvas>
-                    </div>
-
-                    <!-- Missing Values Chart -->
-                    <div class="chart-container">
-                        <h3>Missing Values Analysis</h3>
-                        <canvas id="missingChart"></canvas>
-                    </div>
-
-                    <!-- Data Quality Chart -->
-                    <div class="chart-container">
-                        <h3>Data Quality Score</h3>
-                        <canvas id="qualityChart"></canvas>
-                    </div>
-                </div>
-
-                <!-- Results Section -->
-                <div id="resultsSection" class="results-section hidden">
-                    <h3>Processing Results</h3>
-                    <div class="results-grid">
-                        <div id="resultsContent" class="results-content"></div>
-                    </div>
-                    <div class="action-buttons">
-                        <button id="downloadBtn" class="btn btn-primary">
-                            Download Results
-                        </button>
-                        <button id="downloadDashboardBtn" class="btn btn-accent">
-                            Download Dashboard PDF
-                        </button>
-                        <button id="newAnalysisBtn" class="btn btn-secondary">
-                            New Analysis
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- API Status -->
-        <section class="section api-status-section">
-            <h3>System Status</h3>
-            <div id="apiStatus" class="api-status">
-                <div class="status-item">
-                    <span>Backend API</span>
-                    <span id="apiStatusBadge" class="status-badge disconnected">Checking...</span>
-                </div>
-                <div class="status-item">
-                    <span>Queue Workers</span>
-                    <span id="workersBadge" class="status-badge">-</span>
-                </div>
-                <div class="status-item">
-                    <span>Storage</span>
-                    <span id="storageBadge" class="status-badge">-</span>
-                </div>
-            </div>
-        </section>
-    </main>
-
-    <!-- Footer -->
-    <footer class="footer">
-        <div class="container">
-            <p>&copy; 2026 Advanced Data Processing & Analytics Platform</p>
-            <p class="footer-links">
-                <a href="#api">System Status</a> | 
-                <a href="#" id="refreshStatusBtn">Refresh Status</a>
-            </p>
+<!-- ═══════════════════════════════ HERO ═══════════════════════════════ -->
+<section class="hero">
+    <div class="wrap">
+        <div class="hero-text">
+            <span class="hero-chip">AI-Powered Analytics</span>
+            <h1 class="hero-h1">Turn Your Data Into<br>Actionable Insights</h1>
+            <p class="hero-p">Upload CSV, JSON or Excel — get instant validation, statistics, and interactive charts.</p>
         </div>
-    </footer>
+        <div class="hero-formats">
+            <div class="fmt-box">CSV</div>
+            <div class="fmt-box">JSON</div>
+            <div class="fmt-box">XLSX</div>
+        </div>
+    </div>
+</section>
 
-    <!-- Scripts -->
-    <script src="js/api.js"></script>
-    <script src="js/app.js"></script>
+<!-- ═══════════════════════════════ STEP BAR ═══════════════════════════════ -->
+<div class="stepbar">
+    <div class="wrap">
+        <div class="steps">
+            <div class="step active" id="step1">
+                <div class="step-num">1</div>
+                <span>Upload</span>
+            </div>
+            <div class="step-connector" id="conn1"></div>
+            <div class="step" id="step2">
+                <div class="step-num">2</div>
+                <span>Validate</span>
+            </div>
+            <div class="step-connector" id="conn2"></div>
+            <div class="step" id="step3">
+                <div class="step-num">3</div>
+                <span>Analyze</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ═══════════════════════════════ TOASTS ═══════════════════════════════ -->
+<div class="toast-area wrap">
+    <div id="statusMessage" class="toast toast-ok hidden">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+        <span id="statusText2"></span>
+    </div>
+    <div id="errorMessage" class="toast toast-err hidden">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        <span id="errorText2"></span>
+    </div>
+</div>
+
+<!-- ═══════════════════════════════ MAIN ═══════════════════════════════ -->
+<main class="wrap main-stack">
+
+    <!-- ── UPLOAD CARD ── -->
+    <div class="card" id="upload">
+        <div class="card-head">
+            <div class="card-icon blue">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+            </div>
+            <div>
+                <h2 class="card-title">Upload Data</h2>
+                <p class="card-sub">Drag &amp; drop or click to browse your file</p>
+            </div>
+        </div>
+
+        <div class="drop-zone" id="dropZone">
+            <div class="dz-glow"></div>
+            <div class="dz-body">
+                <div class="dz-icon-ring">
+                    <svg class="dz-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                        <polyline points="17 8 12 3 7 8"/>
+                        <line x1="12" y1="3" x2="12" y2="15"/>
+                    </svg>
+                </div>
+                <h3 class="dz-title">Drop your file here</h3>
+                <p class="dz-hint">or <span class="dz-browse">click to browse</span></p>
+                <div class="dz-tags">
+                    <span class="dz-tag">CSV</span>
+                    <span class="dz-tag">JSON</span>
+                    <span class="dz-tag">XLSX</span>
+                    <span class="dz-tag">XLS</span>
+                </div>
+                <p class="dz-limit">Max 100 MB</p>
+            </div>
+            <input type="file" id="fileInput" class="file-input" accept=".csv,.json,.xlsx,.xls">
+        </div>
+
+        <div id="fileInfo" class="file-info hidden">
+            <div class="fi-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+            </div>
+            <div class="fi-meta">
+                <span id="fileName" class="fi-name">—</span>
+                <span id="fileSize" class="fi-size"></span>
+            </div>
+            <button id="clearFileBtn" class="btn btn-ghost btn-sm">✕ Remove</button>
+        </div>
+
+        <div class="btn-row">
+            <button id="validateBtn" class="btn btn-primary" disabled>
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+                <span class="btn-text">Validate Data</span>
+                <span id="validateSpinner" class="spinner hidden"></span>
+            </button>
+            <button id="processBtn" class="btn btn-green" disabled>
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+                <span class="btn-text">Process &amp; Analyze</span>
+                <span id="processSpinner" class="spinner hidden"></span>
+            </button>
+        </div>
+    </div>
+
+    <!-- ── PREVIEW CARD ── -->
+    <div class="card hidden" id="preview">
+        <div class="card-head">
+            <div class="card-icon green">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+            </div>
+            <div>
+                <h2 class="card-title">Data Preview</h2>
+                <p class="card-sub">Validation report &amp; first 10 rows</p>
+            </div>
+        </div>
+
+        <div id="validationResults" class="vp hidden">
+            <div class="vp-head">
+                <span class="vp-label">Validation Report</span>
+                <span id="validationStatus" class="badge"></span>
+            </div>
+            <div id="validationContent" class="vp-body"></div>
+        </div>
+
+        <div class="table-wrap">
+            <table class="dtable" id="dataTable">
+                <thead><tr id="tableHeader"></tr></thead>
+                <tbody id="tableBody"></tbody>
+            </table>
+            <div id="noDataMessage" class="empty-msg">
+                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
+                <p>No data yet. Upload and validate a file first.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── DASHBOARD CARD ── -->
+    <div class="card hidden" id="dashboard">
+        <div class="card-head">
+            <div class="card-icon purple">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+            </div>
+            <div>
+                <h2 class="card-title">Analytics Dashboard</h2>
+                <p class="card-sub">Processing results and visual insights</p>
+            </div>
+        </div>
+
+        <!-- Progress -->
+        <div id="processingStatus" class="prog-card hidden">
+            <div class="prog-top">
+                <div class="prog-label">
+                    <span class="spin-ring"></span>
+                    <strong>Processing your data…</strong>
+                </div>
+                <span id="jobStatus" class="badge badge-warn">Queued</span>
+            </div>
+            <div class="prog-track"><div id="progressFill" class="prog-fill"></div></div>
+            <div class="prog-meta">
+                <span id="statusText">Initializing…</span>
+                <span class="job-id-lbl">Job: <code id="jobId">—</code></span>
+            </div>
+        </div>
+
+        <!-- KPI grid -->
+        <div id="statsCards" class="kpi-grid hidden">
+            <div class="kpi blue">
+                <div class="kpi-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+                </div>
+                <div class="kpi-text">
+                    <p class="kpi-lbl">Total Records</p>
+                    <p id="statRecords" class="kpi-val">—</p>
+                </div>
+            </div>
+            <div class="kpi green">
+                <div class="kpi-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
+                </div>
+                <div class="kpi-text">
+                    <p class="kpi-lbl">Columns</p>
+                    <p id="statColumns" class="kpi-val">—</p>
+                </div>
+            </div>
+            <div class="kpi amber">
+                <div class="kpi-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                </div>
+                <div class="kpi-text">
+                    <p class="kpi-lbl">Missing Values</p>
+                    <p id="statMissing" class="kpi-val">—</p>
+                </div>
+            </div>
+            <div class="kpi red">
+                <div class="kpi-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                </div>
+                <div class="kpi-text">
+                    <p class="kpi-lbl">Duplicates</p>
+                    <p id="statDuplicates" class="kpi-val">—</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts 2×2 -->
+        <div id="chartsSection" class="charts-grid hidden">
+            <div class="chart-card">
+                <div class="chart-head"><span class="chart-dot blue"></span><h3>Column Mean Values</h3></div>
+                <div class="chart-box"><canvas id="distributionChart"></canvas></div>
+            </div>
+            <div class="chart-card">
+                <div class="chart-head"><span class="chart-dot purple"></span><h3>Avg Correlation Strength</h3></div>
+                <div class="chart-box"><canvas id="correlationChart"></canvas></div>
+            </div>
+            <div class="chart-card">
+                <div class="chart-head"><span class="chart-dot red"></span><h3>Missing Values per Column</h3></div>
+                <div class="chart-box"><canvas id="missingChart"></canvas></div>
+            </div>
+            <div class="chart-card">
+                <div class="chart-head"><span class="chart-dot green"></span><h3>Data Quality Score</h3></div>
+                <div class="chart-box chart-box-sm"><canvas id="qualityChart"></canvas></div>
+            </div>
+        </div>
+
+        <!-- Results + Actions -->
+        <div id="resultsSection" class="results-panel hidden">
+            <div class="results-panel-head">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                <h3>Analysis Complete</h3>
+            </div>
+            <div id="resultsContent" class="results-body"></div>
+            <div class="btn-row">
+                <button id="downloadBtn" class="btn btn-primary">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                    Download CSV
+                </button>
+                <button id="downloadDashboardBtn" class="btn btn-purple">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                    Download PDF
+                </button>
+                <button id="newAnalysisBtn" class="btn btn-ghost">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.85"/></svg>
+                    New Analysis
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── SYSTEM STATUS ── -->
+    <div class="status-bar">
+        <div class="status-bar-head">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+            System Status
+            <button id="refreshStatusBtn" class="refresh-btn">↺ Refresh</button>
+        </div>
+        <div class="status-pills">
+            <div class="status-pill">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+                Backend API
+                <span id="apiStatusBadge" class="badge badge-muted">Checking…</span>
+            </div>
+            <div class="status-pill">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/></svg>
+                Queue Workers
+                <span id="workersBadge" class="badge badge-muted">—</span>
+            </div>
+            <div class="status-pill">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>
+                Storage
+                <span id="storageBadge" class="badge badge-muted">—</span>
+            </div>
+        </div>
+    </div>
+
+</main>
+
+<!-- ═══════════════════════════════ FOOTER ═══════════════════════════════ -->
+<footer class="footer">
+    <div class="wrap footer-inner">
+        <div class="footer-brand">
+            <div class="brand-icon sm">
+                <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+            </div>
+            DataFlow
+        </div>
+        <p class="footer-copy">&copy; 2026 DataFlow Analytics Platform</p>
+        <a href="#" id="footerRefreshBtn" class="footer-link">Refresh Status</a>
+    </div>
+</footer>
+
+<script src="js/api.js"></script>
+<script src="js/app.js"></script>
 </body>
 </html>

@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(wc -l /c/Users/tshre/OneDrive/Desktop/sadul_globalai/backend/services/*.py)",
+      "Bash(pip --version)",
+      "Bash(pip list:*)",
+      "Bash(python -c \"import sys; sys.path.insert\\(0, ''.''\\); from run_backend import app; print\\(''run_backend.py imports OK''\\)\")",
+      "Bash(python -c \":*)",
+      "Bash(pkill -f \"python run_backend.py\")",
+      "Bash(pkill -f \"run_backend\")",
+      "Bash(cd:*)"
+    ]
+  }
+}

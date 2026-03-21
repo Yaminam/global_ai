@@ -5,7 +5,8 @@
 
 const API = (() => {
     // API Configuration
-    const API_BASE_URL = 'http://localhost:5000/api';
+    // Use same origin for API calls (works for both dev and production)
+    const API_BASE_URL = window.location.origin + '/api';
     const POLL_INTERVAL = 2000; // 2 seconds
     const POLL_TIMEOUT = 300000; // 5 minutes
 

@@ -24,11 +24,13 @@ const App = (() => {
         validateSpinner: document.getElementById('validateSpinner'),
         processBtn: document.getElementById('processBtn'),
         processSpinner: document.getElementById('processSpinner'),
-        
-        // Messages
+
+        // Messages (toast)
         statusMessage: document.getElementById('statusMessage'),
         errorMessage: document.getElementById('errorMessage'),
-        
+        statusText2: document.getElementById('statusText2'),
+        errorText2: document.getElementById('errorText2'),
+
         // Preview
         previewSection: document.getElementById('preview'),
         validationResults: document.getElementById('validationResults'),
@@ -38,7 +40,7 @@ const App = (() => {
         tableBody: document.getElementById('tableBody'),
         dataTable: document.getElementById('dataTable'),
         noDataMessage: document.getElementById('noDataMessage'),
-        
+
         // Dashboard
         dashboardSection: document.getElementById('dashboard'),
         processingStatus: document.getElementById('processingStatus'),
@@ -57,13 +59,19 @@ const App = (() => {
         downloadBtn: document.getElementById('downloadBtn'),
         downloadDashboardBtn: document.getElementById('downloadDashboardBtn'),
         newAnalysisBtn: document.getElementById('newAnalysisBtn'),
-        
+
         // API Status
         apiStatusBadge: document.getElementById('apiStatusBadge'),
         workersBadge: document.getElementById('workersBadge'),
         storageBadge: document.getElementById('storageBadge'),
         healthBtn: document.getElementById('healthBtn'),
-        refreshStatusBtn: document.getElementById('refreshStatusBtn')
+        refreshStatusBtn: document.getElementById('refreshStatusBtn'),
+
+        // Steps
+        step1: document.getElementById('step1'),
+        step2: document.getElementById('step2'),
+        step3: document.getElementById('step3'),
+        stepLines: document.querySelectorAll('.step-connector'),
     };
 
     /**
@@ -99,6 +107,8 @@ const App = (() => {
         // Health check
         elements.healthBtn.addEventListener('click', checkAPIHealth);
         elements.refreshStatusBtn.addEventListener('click', checkAPIHealth);
+        const footerRefreshBtn = document.getElementById('footerRefreshBtn');
+        if (footerRefreshBtn) footerRefreshBtn.addEventListener('click', (e) => { e.preventDefault(); checkAPIHealth(); });
     }
 
     /**
@@ -158,6 +168,7 @@ const App = (() => {
         currentFile = file;
         updateFileInfo();
         elements.validateBtn.disabled = false;
+        setStep(1);
         showStatus(`File selected: ${file.name} (${API.formatFileSize(file.size)})`);
     }
 
@@ -226,6 +237,7 @@ const App = (() => {
 
             validationData = validateResult.data.data;
             displayValidationResults();
+            setStep(2);
             showStatus('Data validated successfully!');
             elements.processBtn.disabled = false;
 
@@ -243,7 +255,7 @@ const App = (() => {
         const { is_valid, issues, statistics, preview } = validationData;
 
         // Show validation status
-        elements.validationStatus.className = 'status-badge ' + (is_valid ? 'success' : 'warning');
+        elements.validationStatus.className = 'badge ' + (is_valid ? 'badge-ok' : 'badge-warn');
         elements.validationStatus.textContent = is_valid ? 'Valid' : 'Has Issues';
 
         // Generate validation content
@@ -372,6 +384,7 @@ const App = (() => {
             
             // Update Job ID display
             elements.jobId.textContent = currentJobId;
+            setStep(3);
             showDashboard();
             showStatus(`Processing started. Job ID: ${currentJobId}`);
             
@@ -401,7 +414,7 @@ const App = (() => {
                 // Update status text
                 elements.statusText.textContent = `${status.status} (${progress}%)`;
                 elements.jobStatus.textContent = status.status.toUpperCase();
-                elements.jobStatus.className = 'status-badge ' + getStatusClass(status.status);
+                elements.jobStatus.className = 'badge ' + getStatusClass(status.status);
 
                 if (status.status === 'completed') {
                     showStatus('Processing completed successfully!');
@@ -421,12 +434,12 @@ const App = (() => {
      */
     function getStatusClass(status) {
         const statusMap = {
-            'queued': 'warning',
-            'processing': 'warning',
-            'completed': 'success',
-            'failed': 'error'
+            'queued':     'badge-warn',
+            'processing': 'badge-warn',
+            'completed':  'badge-ok',
+            'failed':     'badge-err'
         };
-        return statusMap[status] || 'disconnected';
+        return statusMap[status] || 'badge-muted';
     }
 
     /**
@@ -481,26 +494,38 @@ const App = (() => {
 
         elements.chartsSection.classList.remove('hidden');
 
-        // Distribution Chart
+        // Distribution Chart — mean value per numeric column
         try {
             const distData = processingData.distribution || {};
-            createChart('distributionChart', 'bar', distData);
+            if (Object.keys(distData).length > 0) {
+                createBarChart('distributionChart', distData, 'Mean Value', 'Column', 'Mean');
+            } else {
+                hideChart('distributionChart', 'No numeric columns found');
+            }
         } catch (e) {
             console.error('Error creating distribution chart:', e);
         }
 
-        // Correlation Chart
+        // Correlation Chart — avg correlation per numeric column
         try {
             const corrData = processingData.correlations || {};
-            createChart('correlationChart', 'scatter', corrData);
+            if (Object.keys(corrData).length > 0) {
+                createBarChart('correlationChart', corrData, 'Avg Correlation', 'Column', 'Correlation', 'rgba(139, 92, 246, 0.6)', 'rgba(139, 92, 246, 1)');
+            } else {
+                hideChart('correlationChart', 'No numeric columns for correlation');
+            }
         } catch (e) {
             console.error('Error creating correlation chart:', e);
         }
 
-        // Missing Values Chart
+        // Missing Values Chart — missing count per column
         try {
             const missingData = processingData.missing_analysis || {};
-            createChart('missingChart', 'bar', missingData);
+            if (Object.keys(missingData).length > 0) {
+                createBarChart('missingChart', missingData, 'Missing Values per Column', 'Column', 'Missing Count', 'rgba(239, 68, 68, 0.6)', 'rgba(239, 68, 68, 1)');
+            } else {
+                hideChart('missingChart', 'No missing value data');
+            }
         } catch (e) {
             console.error('Error creating missing chart:', e);
         }
@@ -515,10 +540,9 @@ const App = (() => {
     }
 
     /**
-     * Create chart using Chart.js
+     * Create a bar chart with proper axis labels from actual data keys
      */
-    function createChart(canvasId, type, data) {
-        // Destroy existing chart if it exists
+    function createBarChart(canvasId, data, title, xLabel, yLabel, bgColor, borderColor) {
         if (charts[canvasId]) {
             charts[canvasId].destroy();
         }
@@ -526,45 +550,71 @@ const App = (() => {
         const canvas = document.getElementById(canvasId);
         if (!canvas) return;
 
-        const ctx = canvas.getContext('2d');
-        const labels = Object.keys(data).slice(0, 10);
-        const values = Object.values(data).slice(0, 10);
+        bgColor = bgColor || 'rgba(59, 130, 246, 0.6)';
+        borderColor = borderColor || 'rgba(59, 130, 246, 1)';
 
-        const chartType = type === 'scatter' ? 'bar' : type;
+        const labels = Object.keys(data);
+        const values = Object.values(data);
 
-        const chartConfig = {
-            type: chartType,
+        charts[canvasId] = new Chart(canvas.getContext('2d'), {
+            type: 'bar',
             data: {
                 labels: labels,
                 datasets: [{
-                    label: 'Data',
+                    label: yLabel || 'Value',
                     data: values,
-                    backgroundColor: 'rgba(59, 130, 246, 0.6)',
-                    borderColor: 'rgba(59, 130, 246, 1)',
-                    borderWidth: 2,
-                    tension: 0.4
+                    backgroundColor: bgColor,
+                    borderColor: borderColor,
+                    borderWidth: 2
                 }]
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
                 plugins: {
-                    legend: {
-                        display: true,
-                        labels: {
-                            font: { size: 12 }
-                        }
+                    legend: { display: true },
+                    title: {
+                        display: !!title,
+                        text: title,
+                        font: { size: 13 }
                     }
                 },
                 scales: {
+                    x: {
+                        title: {
+                            display: true,
+                            text: xLabel || 'Column'
+                        },
+                        ticks: {
+                            maxRotation: 45,
+                            minRotation: 0,
+                            autoSkip: false
+                        }
+                    },
                     y: {
-                        beginAtZero: true
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: yLabel || 'Value'
+                        }
                     }
                 }
             }
-        };
+        });
+    }
 
-        charts[canvasId] = new Chart(ctx, chartConfig);
+    /**
+     * Show a placeholder message when chart has no data
+     */
+    function hideChart(canvasId, message) {
+        const canvas = document.getElementById(canvasId);
+        if (!canvas) return;
+        const container = canvas.parentElement;
+        canvas.style.display = 'none';
+        const msg = document.createElement('p');
+        msg.style.cssText = 'color:#94a3b8;text-align:center;padding:2rem;';
+        msg.textContent = message;
+        container.appendChild(msg);
     }
 
     /**
@@ -700,6 +750,7 @@ const App = (() => {
         processingData = null;
         Object.values(charts).forEach(chart => chart?.destroy?.());
         charts = {};
+        setStep(1);
         showStatus('Ready for new analysis');
     }
 
@@ -720,7 +771,7 @@ const App = (() => {
             const storageResult = await API.getStorageStats();
 
             if (healthResult.success) {
-                elements.apiStatusBadge.className = 'status-badge success';
+                elements.apiStatusBadge.className = 'badge badge-ok';
                 elements.apiStatusBadge.textContent = 'Connected';
             } else {
                 throw new Error('Health check failed');
@@ -729,44 +780,40 @@ const App = (() => {
             if (queueResult.success) {
                 const workers = queueResult.data.data?.stats?.active_workers || 0;
                 elements.workersBadge.textContent = `${workers} active`;
-                elements.workersBadge.className = 'status-badge ' + (workers > 0 ? 'success' : 'warning');
+                elements.workersBadge.className = 'badge ' + (workers > 0 ? 'badge-ok' : 'badge-warn');
             }
 
             if (storageResult.success) {
                 elements.storageBadge.textContent = 'OK';
-                elements.storageBadge.className = 'status-badge success';
+                elements.storageBadge.className = 'badge badge-ok';
             }
 
         } catch (error) {
-            elements.apiStatusBadge.className = 'status-badge disconnected';
+            elements.apiStatusBadge.className = 'badge badge-err';
             elements.apiStatusBadge.textContent = 'Disconnected';
-            elements.workersBadge.textContent = '-';
-            elements.storageBadge.textContent = '-';
+            elements.workersBadge.textContent = '—';
+            elements.storageBadge.textContent = '—';
         }
     }
 
     /**
-     * Show status message
+     * Show status toast
      */
     function showStatus(message) {
-        elements.statusMessage.textContent = message;
+        if (elements.statusText2) elements.statusText2.textContent = message;
         elements.statusMessage.classList.remove('hidden');
         elements.errorMessage.classList.add('hidden');
-        setTimeout(() => {
-            elements.statusMessage.classList.add('hidden');
-        }, 5000);
+        setTimeout(() => elements.statusMessage.classList.add('hidden'), 5000);
     }
 
     /**
-     * Show error message
+     * Show error toast
      */
     function showError(message) {
-        elements.errorMessage.textContent = message;
+        if (elements.errorText2) elements.errorText2.textContent = message;
         elements.errorMessage.classList.remove('hidden');
         elements.statusMessage.classList.add('hidden');
-        setTimeout(() => {
-            elements.errorMessage.classList.add('hidden');
-        }, 7000);
+        setTimeout(() => elements.errorMessage.classList.add('hidden'), 7000);
     }
 
     /**
@@ -775,6 +822,20 @@ const App = (() => {
     function clearMessages() {
         elements.statusMessage.classList.add('hidden');
         elements.errorMessage.classList.add('hidden');
+    }
+
+    /**
+     * Update step indicator
+     */
+    function setStep(n) {
+        [elements.step1, elements.step2, elements.step3].forEach((el, i) => {
+            if (!el) return;
+            el.classList.toggle('active', i + 1 === n);
+            el.classList.toggle('done', i + 1 < n);
+        });
+        elements.stepLines.forEach((line, i) => {
+            line.classList.toggle('done', i + 1 < n);
+        });
     }
 
     /**
