@@ -23,6 +23,7 @@
             <span class="brand-name">DataFlow</span>
         </div>
         <nav class="nav-links">
+            <a href="#register"  class="nav-a">Register</a>
             <a href="#upload"    class="nav-a">Upload</a>
             <a href="#preview"   class="nav-a">Preview</a>
             <a href="#dashboard" class="nav-a">Dashboard</a>
@@ -85,6 +86,76 @@
 
 <!-- ═══════════════════════════════ MAIN ═══════════════════════════════ -->
 <main class="wrap main-stack">
+
+    <!-- ── REGISTRATION CARD ── -->
+    <div class="card" id="register">
+        <div class="card-head">
+            <div class="card-icon green">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                    <circle cx="12" cy="7" r="4"/>
+                </svg>
+            </div>
+            <div>
+                <h2 class="card-title">User Registration</h2>
+                <p class="card-sub">Create your account with validated credentials</p>
+            </div>
+        </div>
+
+        <form id="registrationForm" class="registration-form">
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="regName" class="form-label">Full Name</label>
+                    <input type="text" id="regName" class="form-input" placeholder="John Doe" required>
+                    <span class="form-hint">Letters and spaces only (2-50 characters)</span>
+                    <span id="nameError" class="form-error"></span>
+                </div>
+
+                <div class="form-group">
+                    <label for="regEmail" class="form-label">Email Address</label>
+                    <input type="email" id="regEmail" class="form-input" placeholder="john@example.com" required>
+                    <span class="form-hint">Valid email format required</span>
+                    <span id="emailError" class="form-error"></span>
+                </div>
+
+                <div class="form-group">
+                    <label for="regPhone" class="form-label">Phone Number</label>
+                    <input type="tel" id="regPhone" class="form-input" placeholder="+1234567890" required>
+                    <span class="form-hint">10-15 digits, optionally starting with +</span>
+                    <span id="phoneError" class="form-error"></span>
+                </div>
+
+                <div class="form-group">
+                    <label for="regPassword" class="form-label">Password</label>
+                    <input type="password" id="regPassword" class="form-input" placeholder="Strong password" required>
+                    <span class="form-hint">Min 8 chars: uppercase, lowercase, digit, special char</span>
+                    <span id="passwordError" class="form-error"></span>
+                </div>
+            </div>
+
+            <div id="registrationSuccess" class="success-message hidden">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <polyline points="20 6 9 17 4 12"/>
+                </svg>
+                <div>
+                    <strong>Registration Successful!</strong>
+                    <p id="regSuccessDetails"></p>
+                </div>
+            </div>
+
+            <div class="btn-row">
+                <button type="submit" id="registerBtn" class="btn btn-green">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                        <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/>
+                        <circle cx="12" cy="7" r="4"/>
+                    </svg>
+                    <span class="btn-text">Register</span>
+                    <span id="registerSpinner" class="spinner hidden"></span>
+                </button>
+                <button type="button" id="clearFormBtn" class="btn btn-ghost">Clear Form</button>
+            </div>
+        </form>
+    </div>
 
     <!-- ── UPLOAD CARD ── -->
     <div class="card" id="upload">

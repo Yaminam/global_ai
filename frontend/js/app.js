@@ -5,6 +5,7 @@
 
 const App = (() => {
     // State
+    let isRegistered = false;
     let currentFile = null;
     let currentJobId = null;
     let validationData = null;
@@ -13,7 +14,25 @@ const App = (() => {
 
     // DOM Elements
     const elements = {
+        // Registration
+        registerSection: document.getElementById('register'),
+        registrationForm: document.getElementById('registrationForm'),
+        regName: document.getElementById('regName'),
+        regEmail: document.getElementById('regEmail'),
+        regPhone: document.getElementById('regPhone'),
+        regPassword: document.getElementById('regPassword'),
+        registerBtn: document.getElementById('registerBtn'),
+        registerSpinner: document.getElementById('registerSpinner'),
+        clearFormBtn: document.getElementById('clearFormBtn'),
+        registrationSuccess: document.getElementById('registrationSuccess'),
+        regSuccessDetails: document.getElementById('regSuccessDetails'),
+        nameError: document.getElementById('nameError'),
+        emailError: document.getElementById('emailError'),
+        phoneError: document.getElementById('phoneError'),
+        passwordError: document.getElementById('passwordError'),
+
         // Upload
+    uploadSection: document.getElementById('upload'),
         dropZone: document.getElementById('dropZone'),
         fileInput: document.getElementById('fileInput'),
         fileInfo: document.getElementById('fileInfo'),
@@ -78,15 +97,51 @@ const App = (() => {
      * Initialize the application
      */
     function init() {
+        isRegistered = false;
+        applyRegistrationGate();
         setupEventListeners();
         checkAPIHealth();
         setInterval(checkAPIHealth, 30000); // Check every 30 seconds
+    }
+
+    function applyRegistrationGate() {
+        if (!elements.registerSection || !elements.uploadSection) return;
+
+        const navLinks = document.querySelectorAll('.nav-a');
+
+        if (!isRegistered) {
+            elements.registerSection.classList.remove('hidden');
+            elements.uploadSection.classList.add('hidden');
+            elements.previewSection.classList.add('hidden');
+            elements.dashboardSection.classList.add('hidden');
+            navLinks.forEach((link) => {
+                const target = (link.getAttribute('href') || '').replace('#', '');
+                if (target !== 'register') {
+                    link.classList.add('nav-a-disabled');
+                    link.setAttribute('aria-disabled', 'true');
+                }
+            });
+            return;
+        }
+
+        elements.registerSection.classList.add('hidden');
+        elements.uploadSection.classList.remove('hidden');
+        navLinks.forEach((link) => {
+            link.classList.remove('nav-a-disabled');
+            link.removeAttribute('aria-disabled');
+        });
     }
 
     /**
      * Setup all event listeners
      */
     function setupEventListeners() {
+        // Registration form
+        if (elements.registrationForm) {
+            elements.registrationForm.addEventListener('submit', handleRegistration);
+            elements.clearFormBtn.addEventListener('click', clearRegistrationForm);
+        }
+
         // Drag and drop
         elements.dropZone.addEventListener('dragover', handleDragOver);
         elements.dropZone.addEventListener('dragleave', handleDragLeave);
@@ -147,6 +202,11 @@ const App = (() => {
      * Handle file selection
      */
     async function handleFileSelect(e) {
+        if (!isRegistered) {
+            showError('Please complete registration first.');
+            return;
+        }
+
         const files = e.target.files;
         if (files.length === 0) return;
 
@@ -199,6 +259,11 @@ const App = (() => {
      * Validate data
      */
     async function validateData() {
+        if (!isRegistered) {
+            showError('Please complete registration first.');
+            return;
+        }
+
         if (!currentFile) {
             showError('No file selected');
             return;
@@ -344,6 +409,11 @@ const App = (() => {
      * Process data
      */
     async function processData() {
+        if (!isRegistered) {
+            showError('Please complete registration first.');
+            return;
+        }
+
         if (!validationData) {
             showError('Please validate data first');
             return;
@@ -449,18 +519,61 @@ const App = (() => {
         try {
             // Get analytics data
             const analyticsResult = await API.getAnalytics(currentJobId);
+            const resultsResult = await API.getResults(currentJobId);
+
+            const overview = resultsResult.success
+                ? (resultsResult.data.data?.statistics_overview || null)
+                : null;
             
             if (analyticsResult.success) {
                 processingData = analyticsResult.data.data;
-                displayStatistics();
-                displayCharts();
             } else {
                 showError(`Analytics unavailable: ${analyticsResult.error}`);
+                processingData = {
+                    statistics: overview || {
+                        total_records: 0,
+                        total_columns: 0,
+                        missing_values: 0,
+                        duplicate_rows: 0
+                    },
+                    distribution: {},
+                    correlations: {},
+                    missing_analysis: {},
+                    quality_score: 0
+                };
             }
 
-            // Get results
-            const resultsResult = await API.getResults(currentJobId);
-            
+            // Fill any missing analytics summary fields from results overview.
+            if (processingData && overview) {
+                processingData.statistics = {
+                    total_records: processingData.statistics?.total_records ?? overview.total_records,
+                    total_columns: processingData.statistics?.total_columns ?? overview.total_columns,
+                    missing_values: processingData.statistics?.missing_values ?? overview.missing_values,
+                    duplicate_rows: processingData.statistics?.duplicate_rows ?? overview.duplicate_rows
+                };
+            }
+
+            // Final guard: if backend returned zeros, prefer known validation stats.
+            if (processingData && validationData?.statistics) {
+                const stats = processingData.statistics || {};
+                const statsAreZero = Number(stats.total_records || 0) === 0 && Number(stats.total_columns || 0) === 0;
+                const validationHasData = Number(validationData.statistics.total_records || 0) > 0;
+                if (statsAreZero && validationHasData) {
+                    processingData.statistics = {
+                        total_records: validationData.statistics.total_records || 0,
+                        total_columns: validationData.statistics.total_columns || 0,
+                        missing_values: validationData.statistics.missing_values || 0,
+                        duplicate_rows: validationData.statistics.duplicate_rows || 0
+                    };
+                    if (!processingData.quality_score || Number(processingData.quality_score) === 0) {
+                        processingData.quality_score = validationData.quality_score || 0;
+                    }
+                }
+            }
+
+            displayStatistics();
+            displayCharts();
+
             if (resultsResult.success) {
                 displayResultsContent(resultsResult.data.data);
             }
@@ -479,7 +592,15 @@ const App = (() => {
     function displayStatistics() {
         if (!processingData) return;
 
-        const stats = processingData.statistics || {};
+        let stats = processingData.statistics || {};
+        const hasDashboardStats = Number(stats.total_records || 0) > 0 || Number(stats.total_columns || 0) > 0;
+        const hasValidationStats = Number(validationData?.statistics?.total_records || 0) > 0 || Number(validationData?.statistics?.total_columns || 0) > 0;
+
+        if (!hasDashboardStats && hasValidationStats) {
+            stats = validationData.statistics;
+            processingData.statistics = stats;
+        }
+
         elements.statRecords.textContent = stats.total_records || 0;
         elements.statColumns.textContent = stats.total_columns || 0;
         elements.statMissing.textContent = stats.missing_values || 0;
@@ -493,6 +614,7 @@ const App = (() => {
         if (!processingData) return;
 
         elements.chartsSection.classList.remove('hidden');
+        const stats = processingData.statistics || {};
 
         // Distribution Chart — mean value per numeric column
         try {
@@ -520,7 +642,11 @@ const App = (() => {
 
         // Missing Values Chart — missing count per column
         try {
-            const missingData = processingData.missing_analysis || {};
+            let missingData = processingData.missing_analysis || {};
+            if (Object.keys(missingData).length === 0 && Number(stats.missing_values || 0) > 0) {
+                // Fallback when per-column breakdown is unavailable.
+                missingData = { 'Total Missing Values': Number(stats.missing_values || 0) };
+            }
             if (Object.keys(missingData).length > 0) {
                 createBarChart('missingChart', missingData, 'Missing Values per Column', 'Column', 'Missing Count', 'rgba(239, 68, 68, 0.6)', 'rgba(239, 68, 68, 1)');
             } else {
@@ -532,7 +658,14 @@ const App = (() => {
 
         // Quality Chart
         try {
-            const qualityScore = processingData.quality_score || 0;
+            let qualityScore = Number(processingData.quality_score || 0);
+            if ((!qualityScore || qualityScore <= 0) && (stats.total_records || stats.total_columns)) {
+                const missing = Number(stats.missing_values || 0);
+                const rows = Math.max(1, Number(stats.total_records || 1));
+                const cols = Math.max(1, Number(stats.total_columns || 1));
+                const density = missing / (rows * cols);
+                qualityScore = Math.max(0, Math.min(100, Math.round((1 - density) * 100)));
+            }
             createQualityChart('qualityChart', qualityScore);
         } catch (e) {
             console.error('Error creating quality chart:', e);
@@ -549,6 +682,13 @@ const App = (() => {
 
         const canvas = document.getElementById(canvasId);
         if (!canvas) return;
+        const container = canvas.parentElement;
+
+        // Reset no-data placeholder state from previous runs.
+        canvas.style.display = 'block';
+        if (container) {
+            container.querySelectorAll('.chart-empty-msg').forEach((el) => el.remove());
+        }
 
         bgColor = bgColor || 'rgba(59, 130, 246, 0.6)';
         borderColor = borderColor || 'rgba(59, 130, 246, 1)';
@@ -611,7 +751,11 @@ const App = (() => {
         if (!canvas) return;
         const container = canvas.parentElement;
         canvas.style.display = 'none';
+        if (container) {
+            container.querySelectorAll('.chart-empty-msg').forEach((el) => el.remove());
+        }
         const msg = document.createElement('p');
+        msg.className = 'chart-empty-msg';
         msg.style.cssText = 'color:#94a3b8;text-align:center;padding:2rem;';
         msg.textContent = message;
         container.appendChild(msg);
@@ -627,6 +771,12 @@ const App = (() => {
 
         const canvas = document.getElementById(canvasId);
         if (!canvas) return;
+        const container = canvas.parentElement;
+
+        canvas.style.display = 'block';
+        if (container) {
+            container.querySelectorAll('.chart-empty-msg').forEach((el) => el.remove());
+        }
 
         const ctx = canvas.getContext('2d');
         const normalizedScore = Math.min(Math.max(score, 0), 100);
@@ -814,6 +964,109 @@ const App = (() => {
         elements.errorMessage.classList.remove('hidden');
         elements.statusMessage.classList.add('hidden');
         setTimeout(() => elements.errorMessage.classList.add('hidden'), 7000);
+    }
+
+    /**
+     * Unified message helper used by registration flow
+     */
+    function showMessage(message, type = 'success') {
+        if (type === 'error') {
+            showError(message);
+            return;
+        }
+        showStatus(message);
+    }
+
+    /**
+     * Handle registration form submission
+     */
+    async function handleRegistration(e) {
+        e.preventDefault();
+
+        // Clear previous errors
+        clearFormErrors();
+        elements.registrationSuccess.classList.add('hidden');
+
+        // Get form data
+        const formData = {
+            name: elements.regName.value.trim(),
+            email: elements.regEmail.value.trim(),
+            phone: elements.regPhone.value.trim(),
+            password: elements.regPassword.value
+        };
+
+        // Set loading state
+        setButtonLoading(elements.registerBtn, true);
+
+        try {
+            const response = await API.register(formData);
+
+            if (response.success) {
+                // Show success message
+                elements.regSuccessDetails.textContent =
+                    `User ID: ${response.data.user_id} | ${response.data.message}`;
+                elements.registrationSuccess.classList.remove('hidden');
+
+                // Clear form
+                elements.registrationForm.reset();
+
+                isRegistered = true;
+                applyRegistrationGate();
+
+                if (elements.uploadSection) {
+                    elements.uploadSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+
+                // Show success toast
+                showMessage(`Registration successful! Welcome, ${formData.name}`, 'success');
+            } else {
+                // Handle validation errors
+                if (response.errors) {
+                    Object.keys(response.errors).forEach(field => {
+                        const errorElement = document.getElementById(`${field}Error`);
+                        const inputElement = document.getElementById(`reg${field.charAt(0).toUpperCase() + field.slice(1)}`);
+
+                        if (errorElement && inputElement) {
+                            errorElement.textContent = response.errors[field];
+                            inputElement.classList.add('error');
+                        }
+                    });
+                }
+                showMessage(response.error || 'Registration failed', 'error');
+            }
+        } catch (error) {
+            showMessage('Registration failed: ' + error.message, 'error');
+        } finally {
+            setButtonLoading(elements.registerBtn, false);
+        }
+    }
+
+    /**
+     * Clear registration form
+     */
+    function clearRegistrationForm() {
+        elements.registrationForm.reset();
+        clearFormErrors();
+        elements.registrationSuccess.classList.add('hidden');
+    }
+
+    /**
+     * Clear form validation errors
+     */
+    function clearFormErrors() {
+        ['nameError', 'emailError', 'phoneError', 'passwordError'].forEach(errorId => {
+            const errorElement = document.getElementById(errorId);
+            if (errorElement) {
+                errorElement.textContent = '';
+            }
+        });
+
+        ['regName', 'regEmail', 'regPhone', 'regPassword'].forEach(inputId => {
+            const inputElement = document.getElementById(inputId);
+            if (inputElement) {
+                inputElement.classList.remove('error');
+            }
+        });
     }
 
     /**

@@ -77,6 +77,18 @@ storage/cache/*
 !storage/cache/.gitkeep
 storage/temp/*
 !storage/temp/.gitkeep
+storage/uploads/*
+storage/charts/*
+storage/json_data/*
+storage/logs/*
+
+# Backend generated runtime artifacts
+backend/storage/uploads/*
+backend/storage/charts/*
+backend/storage/json_data/*
+backend/storage/logs/*
+backend/storage/__pycache__/
+backend/**/__pycache__/
 
 # Node (if using any frontend tooling)
 node_modules/

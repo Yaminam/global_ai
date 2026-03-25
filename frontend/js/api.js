@@ -34,13 +34,46 @@ const API = (() => {
             }
 
             if (!response.ok) {
-                throw new Error(data.error || data.message || `HTTP ${response.status}`);
+                const error = new Error(data?.error || data?.message || `HTTP ${response.status}`);
+                error.status = response.status;
+                error.data = data;
+                throw error;
             }
 
             return data;
         } catch (error) {
             console.error('API Error:', error);
             throw error;
+        }
+    }
+
+    /**
+     * Register new user
+     */
+    async function register(formData) {
+        try {
+            const response = await request('/register', {
+                method: 'POST',
+                body: JSON.stringify(formData)
+            });
+
+            return {
+                success: true,
+                data: response.data
+            };
+        } catch (error) {
+            if (error.data && typeof error.data === 'object') {
+                return {
+                    success: false,
+                    errors: error.data.errors,
+                    error: error.data.error || error.message
+                };
+            }
+
+            return {
+                success: false,
+                error: error.message
+            };
         }
     }
 
@@ -439,6 +472,7 @@ const API = (() => {
      * Public API
      */
     return {
+        register,
         checkHealth,
         getInfo,
         uploadFile,
