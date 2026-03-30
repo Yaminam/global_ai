@@ -4,7 +4,7 @@ Demonstrates: 2 custom decorators and closures
 """
 import time
 import functools
-from typing import Callable, Any, Dict
+from typing import Callable, Any, Dict, Optional
 from datetime import datetime
 
 
@@ -72,7 +72,7 @@ def cache_decorator(max_size: int = 128):
             cache = {}
             print(f"[CACHE] Cache cleared for {func.__name__}")
 
-        wrapper.clear_cache = clear_cache
+        setattr(wrapper, 'clear_cache', clear_cache)
 
         return wrapper
 
@@ -80,7 +80,7 @@ def cache_decorator(max_size: int = 128):
 
 
 # ==================== BONUS: Logging Decorator ====================
-def log_execution(log_file: str = None):
+def log_execution(log_file: Optional[str] = None):
     """
     Decorator to log function execution
     Demonstrates: Another practical decorator with closures

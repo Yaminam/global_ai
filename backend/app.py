@@ -519,6 +519,112 @@ def download_results(job_id):
         return jsonify({'success': False, 'error': str(e)}), 500
 
 
+@app.route('/api/results/<job_id>/dashboard-pdf', methods=['GET'])
+def download_dashboard_pdf(job_id):
+    """Generate and download a simple dashboard summary PDF for a processed job."""
+    try:
+        processed_data = json_storage.load(f"processed_{job_id}")
+        if not processed_data:
+            return jsonify({'success': False, 'error': 'Job not found'}), 404
+
+        data = processed_data.get('data', {})
+        dataset_info = data.get('dataset_info', {})
+        stats = data.get('statistics', {})
+
+        rows = int(dataset_info.get('rows', 0))
+        columns = int(dataset_info.get('columns', 0))
+
+        # Compute lightweight quality indicators from source file when available.
+        missing_values = 0
+        duplicate_rows = 0
+        file_path = data.get('file_path')
+        if file_path and os.path.exists(file_path):
+            try:
+                df = _load_dataframe(file_path)
+                missing_values = int(df.isna().sum().sum())
+                duplicate_rows = int(df.duplicated().sum())
+            except Exception as calc_err:
+                print(f"PDF metrics warning for {job_id}: {calc_err}")
+
+        quality_score = max(0, min(100, int(round(
+            100 - (missing_values / max(rows * max(columns, 1), 1)) * 100 - duplicate_rows * 0.5
+        ))))
+
+        from reportlab.lib.pagesizes import letter
+        from reportlab.lib.styles import getSampleStyleSheet
+        from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle
+        from reportlab.lib import colors
+        from reportlab.lib.units import inch
+
+        pdf_buffer = io.BytesIO()
+        doc = SimpleDocTemplate(
+            pdf_buffer,
+            pagesize=letter,
+            rightMargin=0.5 * inch,
+            leftMargin=0.5 * inch,
+            topMargin=0.5 * inch,
+            bottomMargin=0.5 * inch
+        )
+
+        styles = getSampleStyleSheet()
+        elements = [
+            Paragraph('Analytics Dashboard Report', styles['Title']),
+            Spacer(1, 0.2 * inch),
+            Paragraph(f"Generated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}", styles['Normal']),
+            Spacer(1, 0.2 * inch),
+            Paragraph('Overview', styles['Heading2'])
+        ]
+
+        overview_table = Table([
+            ['Metric', 'Value'],
+            ['Job ID', job_id],
+            ['Rows', str(rows)],
+            ['Columns', str(columns)],
+            ['Missing Values', str(missing_values)],
+            ['Duplicate Rows', str(duplicate_rows)],
+            ['Quality Score', f'{quality_score}%']
+        ], colWidths=[2.2 * inch, 3.8 * inch])
+        overview_table.setStyle(TableStyle([
+            ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#1f4e79')),
+            ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
+            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+            ('GRID', (0, 0), (-1, -1), 0.5, colors.grey),
+            ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.white, colors.HexColor('#f2f6fb')])
+        ]))
+        elements.append(overview_table)
+
+        if stats:
+            elements.extend([
+                Spacer(1, 0.25 * inch),
+                Paragraph('Statistics', styles['Heading2'])
+            ])
+            stat_rows = [['Metric', 'Value']]
+            for key, value in stats.items():
+                stat_rows.append([str(key), str(value)])
+            stat_table = Table(stat_rows, colWidths=[2.2 * inch, 3.8 * inch])
+            stat_table.setStyle(TableStyle([
+                ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#2e7d32')),
+                ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
+                ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+                ('GRID', (0, 0), (-1, -1), 0.5, colors.grey),
+                ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.white, colors.HexColor('#eef7ef')])
+            ]))
+            elements.append(stat_table)
+
+        doc.build(elements)
+        pdf_buffer.seek(0)
+
+        return send_file(
+            pdf_buffer,
+            mimetype='application/pdf',
+            as_attachment=True,
+            download_name=f"dashboard_{job_id}.pdf"
+        )
+
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
 # ==================== CHART RETRIEVAL ENDPOINT ====================
 @app.route('/api/charts/<job_id>/<chart_type>', methods=['GET'])
 def get_chart(job_id, chart_type):

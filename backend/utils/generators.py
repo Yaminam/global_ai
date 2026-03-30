@@ -2,7 +2,7 @@
 Generator functions module
 Demonstrates: Generator functions using yield
 """
-from typing import Any, Generator, List, Dict
+from typing import Any, Generator, List, Dict, Sequence
 import time
 
 
@@ -108,7 +108,7 @@ def batch_processor(data: List[Dict], process_func=None) -> Generator[Dict, None
         }
 
 
-def statistics_generator(numbers: List[float]) -> Generator[Dict[str, float], None, None]:
+def statistics_generator(numbers: Sequence[float]) -> Generator[Dict[str, float], None, None]:
     """
     Generator that yields running statistics
     Demonstrates: Stateful generator maintaining running totals

@@ -2,7 +2,7 @@
 Custom iterators module
 Demonstrates: Custom iterator implementation using __iter__ and __next__
 """
-from typing import Any, List, Iterator
+from typing import Any, List, Optional, TextIO
 
 
 class DataBatchIterator:
@@ -93,7 +93,7 @@ class FileLineIterator:
     def __init__(self, filepath: str):
         """Initialize with file path"""
         self.filepath = filepath
-        self.file_handle = None
+        self.file_handle: Optional[TextIO] = None
 
     def __iter__(self) -> 'FileLineIterator':
         """Open file and return iterator"""
@@ -105,10 +105,14 @@ class FileLineIterator:
         Return next line from file
         Raises StopIteration when file ends
         """
+        if self.file_handle is None:
+            raise StopIteration
+
         line = self.file_handle.readline()
 
         if not line:
             self.file_handle.close()
+            self.file_handle = None
             raise StopIteration
 
         return line.strip()

@@ -123,7 +123,7 @@ class MultiprocessingProcessor:
     Use case: CPU-bound operations (calculations, data processing)
     """
 
-    def __init__(self, num_processes: int = None):
+    def __init__(self, num_processes: Optional[int] = None):
         """
         Initialize multiprocessing processor
 

@@ -121,7 +121,8 @@ class ChartGenerator:
 
         labels = list(data.keys())
         sizes = list(data.values())
-        colors = plt.cm.Set3(range(len(labels)))
+        cmap = plt.get_cmap('Set3')
+        colors = [tuple(color) for color in cmap(np.linspace(0, 1, len(labels)))]
 
         plt.pie(sizes, labels=labels, colors=colors, autopct='%1.1f%%',
                startangle=90, textprops={'fontsize': 10, 'weight': 'bold'})

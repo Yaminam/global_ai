@@ -3,7 +3,7 @@ Form validation module using Python regex
 Demonstrates regex usage for name, email, phone, and password validation
 """
 import re
-from typing import Dict, Tuple, Optional
+from typing import Dict, Tuple, Optional, Any
 
 
 class FormValidator:
@@ -79,7 +79,7 @@ class FormValidator:
         return True, None
 
     @classmethod
-    def validate_form(cls, data: Dict[str, str]) -> Dict[str, any]:
+    def validate_form(cls, data: Dict[str, str]) -> Dict[str, Any]:
         """
         Validate entire form
         Returns: {'valid': bool, 'errors': {field: error_msg}}

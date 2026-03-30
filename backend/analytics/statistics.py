@@ -4,7 +4,14 @@ Demonstrates: mean, median, standard deviation, correlation analysis
 """
 import pandas as pd
 import numpy as np
-from typing import Dict, List, Union, Optional
+from typing import Dict, List, Union, Optional, Any
+
+
+def _to_float(value: Any) -> float:
+    """Convert scalar-like values to float while handling complex values safely."""
+    if isinstance(value, complex):
+        return float(value.real)
+    return float(value)
 
 
 class StatisticalAnalyzer:
@@ -81,11 +88,11 @@ class StatisticalAnalyzer:
 
         for col in self.numeric_cols:
             statistics[col] = {
-                'mean': float(np.mean(self.df[col])),
-                'median': float(np.median(self.df[col])),
-                'std': float(np.std(self.df[col], ddof=1)),
-                'min': float(self.df[col].min()),
-                'max': float(self.df[col].max()),
+                'mean': _to_float(np.mean(self.df[col])),
+                'median': _to_float(np.median(self.df[col])),
+                'std': _to_float(np.std(self.df[col], ddof=1)),
+                'min': _to_float(self.df[col].min()),
+                'max': _to_float(self.df[col].max()),
                 'count': int(self.df[col].count()),
                 'missing': int(self.df[col].isna().sum())
             }
@@ -107,11 +114,11 @@ class StatisticalAnalyzer:
         for col1 in corr_matrix.columns:
             result[col1] = {}
             for col2 in corr_matrix.columns:
-                result[col1][col2] = float(corr_matrix.loc[col1, col2])
+                result[col1][col2] = _to_float(corr_matrix.loc[col1, col2])
 
         return result
 
-    def compute_distribution(self) -> Dict[str, Dict[str, any]]:
+    def compute_distribution(self) -> Dict[str, Dict[str, Any]]:
         """
         Compute distribution statistics for each numeric column
         Returns percentiles, quartiles, etc.
@@ -120,17 +127,17 @@ class StatisticalAnalyzer:
 
         for col in self.numeric_cols:
             distribution[col] = {
-                'q1': float(self.df[col].quantile(0.25)),
-                'q2': float(self.df[col].quantile(0.50)),  # Median
-                'q3': float(self.df[col].quantile(0.75)),
-                'iqr': float(self.df[col].quantile(0.75) - self.df[col].quantile(0.25)),
-                'skewness': float(self.df[col].skew()),
-                'kurtosis': float(self.df[col].kurtosis())
+                'q1': _to_float(self.df[col].quantile(0.25)),
+                'q2': _to_float(self.df[col].quantile(0.50)),  # Median
+                'q3': _to_float(self.df[col].quantile(0.75)),
+                'iqr': _to_float(self.df[col].quantile(0.75) - self.df[col].quantile(0.25)),
+                'skewness': _to_float(self.df[col].skew()),
+                'kurtosis': _to_float(self.df[col].kurtosis())
             }
 
         return distribution
 
-    def get_summary_report(self) -> Dict[str, any]:
+    def get_summary_report(self) -> Dict[str, Any]:
         """
         Generate comprehensive statistical summary report
         """

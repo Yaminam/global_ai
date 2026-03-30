@@ -863,7 +863,10 @@ const App = (() => {
 
         try {
             showStatus('Downloading results...');
-            await API.downloadResults(currentJobId, 'csv');
+            const result = await API.downloadResults(currentJobId, 'csv');
+            if (!result.success) {
+                throw new Error(result.error || 'Unable to download results');
+            }
             showStatus('Results downloaded successfully!');
         } catch (error) {
             showError(`Download failed: ${error.message}`);
@@ -881,7 +884,10 @@ const App = (() => {
 
         try {
             showStatus('Generating dashboard PDF...');
-            await API.downloadDashboardPDF(currentJobId);
+            const result = await API.downloadDashboardPDF(currentJobId);
+            if (!result.success) {
+                throw new Error(result.error || 'Unable to download dashboard PDF');
+            }
             showStatus('Dashboard PDF downloaded successfully!');
         } catch (error) {
             showError(`PDF download failed: ${error.message}`);
